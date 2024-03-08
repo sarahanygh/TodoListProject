@@ -48,11 +48,21 @@ def add_todo():
 @app.route('/api/todos/<int:id>', methods=['PUT'])
 def update_todo(id):
     todo = Todo.query.get(id)
+    if not todo:
+        return jsonify({'error': 'Todo not found'}), 404
+    
     data = request.json
-    todo.text = data['text']
-    todo.is_completed = data['is_completed']
+    new_text = data.get('text')
+    is_completed = data.get('is_completed')
+
+    if new_text is not None:
+        todo.text = new_text
+    if is_completed is not None:
+        todo.is_completed = is_completed
+
     db.session.commit()
-    return jsonify(todo.serialize())
+    return jsonify({'message': 'Todo updated successfully', 'todo': todo.serialize()}), 200
+   
 
 @app.route('/api/todos/<int:id>', methods=['DELETE'])
 def delete_todo(id):
